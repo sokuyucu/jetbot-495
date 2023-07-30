@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>    
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="{{url_for('static', filename='website_1.js')}}"></script>
+    <!--    
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    -->
+    <title>Group5</title>
+    
+    
+    <script src="jquery.js"></script> 
+    <script> 
+    $(function(){
+      $("#includedContent").load("table.html"); 
+    });
+    </script> 
+    
+    
+</head>
+
+<body>
+    
+    <section>
+      <h1>Group 5 Jetbot Interface</h1>
+      <p id=status_1>IDLE.</p>
+    </section>
+    
+    <!-- CAMERA FEED   -->
+    <img src="{{ url_for('video_feed') }}">
+    
+    <!-- BUTTONS   -->
+    <h1>JETBOT CONTROLS</h1>
+
+    <button type="button" onclick="StatusUpdate()">INITIATE</button>
+
+
+    <div id="includedContent"></div>
+    <!--    
+    ----------------------------
+    -->
+    
+</body>
+
+</html>
