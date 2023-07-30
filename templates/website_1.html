@@ -4,10 +4,28 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="{{url_for('static', filename='website_1.js')}}"></script>
-    <!--    
-    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-    -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    
+    <script type="text/javascript">
+    var intervalID = setInterval(update_values,1000);
+
+      function update_values() {
+            $.getJSON($SCRIPT_ROOT + '/_stuff',
+               
+          function(data) {
+            $('#result').text(data.result);
+            console.log(data)
+          });
+      
+        };
+    
+        function stopTextColor() {
+          clearInterval(intervalID);
+        }
+    </script>
+
+
+    
     <title>Group5</title>
     
     
@@ -42,6 +60,15 @@
     ----------------------------
     -->
     
-</body>
+    <h1>Dynamic Update</h1>
+    <p>
+        <span id="result">?</span>
+    <script>
+    document.getElementById("result").innerHTML;
+    </script>
+
+        <button onclick="stopTextColor();">Stop</button>
+    
+    </body>
 
 </html>

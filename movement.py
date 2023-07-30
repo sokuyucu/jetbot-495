@@ -18,6 +18,7 @@ time.sleep(1.0)
 robot.left_motor.value = 0.0 # left motor at %0
 robot.right_motor.value = 0.0 # right motor at %0
 
+# MAIN CONTROL FUNCTIONS
 def stop(change):
     robot.stop()
     

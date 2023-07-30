@@ -10,14 +10,12 @@ import datetime
 import imutils
 import time
 import cv2
-
 from flask import Flask, jsonify
 from werkzeug.security import safe_join
 
 
 
-from jetbot.robot import Robot
-robot = Robot()
+
 
 # initialize the output frame and a lock used to ensure thread-safe
 # exchanges of the output frames (useful when multiple browsers/tabs
@@ -46,10 +44,20 @@ data = (
 
 #-----------------------------------------------------------
 
+from jetbot import Robot
+robot = Robot()
+
+
 @app.route("/table")
 def table():
 	# return the rendered template
 	return render_template("table.html", headings=headings, data=data)
+
+@app.route('/stuff', methods = ['GET'])
+def stuff():
+	# return the rendered template
+	return jsonify(result=time.time())
+
 
 
 #-------------------------------------------------------------------
@@ -76,14 +84,14 @@ def detect_motion(frameCount):
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		gray = cv2.GaussianBlur(gray, (7, 7), 0)
 
-		img_processed=md.detectColour(frame)
-
+		img_processed,detected,detected_offset,detected_size_x=md.detectColour(frame)
+		Jetbot_cup_detect(detected_offset)
 		# acquire the lock, set the output frame, and release the
 		# lock
 		print("----------------detect_motion")
 		with lock:
 			#outputFrame = frame.copy()
-			outputFrame = img_processed[0]
+			outputFrame = img_processed
 
 def generate():
 	# grab global references to the output frame and lock variables
@@ -105,6 +113,7 @@ def generate():
 		yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + 
 			bytearray(encodedImage) + b'\r\n')
 		print("----------------generate")
+		time.sleep(0.5) # delay
 
         
 
@@ -117,14 +126,30 @@ def video_feed():
 
 
 
-def movement_control():
-    # control vehicle movement
-    robot.left(speed=0.3)
-    if img_processed:
+def Jetbot_cup_detect(detected_offset):
+    range = 50 #range to center from center as pixels
+    if(detected_offset>1000):
+        pass
+    if(detected_offset>range):
+        robot.left(0.3)
+        print("-----------------------------------------moving--------LEFT")
+    if(detected_offset<(range)*(-1)):
+        robot.right(0.3)
+        print("-----------------------------------------moving--------RIGHT")
+    if((detected_offset>(range)*(-1)) and (detected_offset<range)):
+        robot.forward(0.15)
+        print("-----------------------------------------moving--------FORWARD")
+    if(detected_size_x>960 and (detected_offset<500 or detected_offset>500*(-1))):
+        #GRAB
         robot.stop()
+        print("-----------------------------------------STOPPEd-TO-GRAB")
+    else:
+        robot.stop()
+        print("-----------------------------------------STOPPED")
+        
+   # time.sleep(0.5) # delay
 
-
-
+def jetbot_target_detect(detected_offset_green):
 
 # check to see if this is the main thread of execution
 if __name__ == '__main__':

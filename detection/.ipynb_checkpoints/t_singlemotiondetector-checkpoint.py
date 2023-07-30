@@ -74,14 +74,17 @@ class SingleMotionDetector:
 		frame_count = 0
 
 		lower_black = np.array([0, 0, 0])
-		upper_black = np.array([180, 255, 30])
+		upper_black = np.array([180, 255, 70])
         
 
 		black_cup_list_area=list()
 		black_cup_nparray=np.empty((0,4),dtype=int)
         
+        # Blur out the noise
+		kernel2 = np.ones((15, 15), np.float32)/225
+		image = cv2.filter2D(src=image, ddepth=-1, kernel=kernel2)
+        
 		# Convert the image to grayscale
-
 		gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 		# Calculate FPS
  
@@ -100,9 +103,9 @@ class SingleMotionDetector:
 			mask = cv2.inRange(hsv_image, np.array(lower), np.array(upper))
 
 			# Apply morphological operations to remove noise
-			kernel = np.ones((5, 5), np.uint8)
-			mask = cv2.erode(mask, kernel, iterations=4)
-			mask = cv2.dilate(mask, kernel, iterations=4)
+			kernel = np.ones((15, 15), np.uint8)
+			mask = cv2.erode(mask, kernel, iterations=5)
+			mask = cv2.dilate(mask, kernel, iterations=5)
 
 			# Find contours of the detected objects
 			contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -122,17 +125,29 @@ class SingleMotionDetector:
 				nparray=np.array([x,y,w,h])
 				black_cup_nparray=np.append(black_cup_nparray,[nparray],axis=0)
 
+
+
 		# Display the original image with bounding rectangles
+		detected_offset = 20000
+		detected_center_x = 20000
+		detected_size_x = 20000
 		if (len(black_cup_list_area))>0:    
 			index_of_black_cup=black_cup_list_area.index(max(black_cup_list_area))
 			detected=True
 			#print(index_of_black_cup)
 			#print(black_cup_nparray)
-			#print(black_cup_nparray[index_of_black_cup])
+			#print(black_cup_nparray[index_of_black_cup])  # x y w h
+			#print(image.shape)
+			#print(detected)		
             
+			detected_center_x = black_cup_nparray[index_of_black_cup][0] + black_cup_nparray[index_of_black_cup][2]/2
+			detected_offset = 960-detected_center_x
+            detected_size_x = black_cup_nparray[index_of_black_cup][2]
+
+        
         #centering boundries
 		height = image.shape[0]
 		width = image.shape[1]
 		cv2.line(image, (int(width/4), 0), (int(width/4), height), (0, 0, 0), thickness=line_thickness)
 		cv2.line(image, (width-int(width/4), 0), (width-int(width/4), height), (0, 0, 0), thickness=line_thickness)
-		return (image,detected)
+		return (image,detected,detected_offset,detected_size_x)
